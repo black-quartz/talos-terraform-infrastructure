@@ -1,0 +1,69 @@
+metadata:
+  hostname: talos-01
+  address: talos-01
+
+machine:
+  nodeLabels:
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
+
+  certSANs: ["talos.labrynth.cloud", "talos-01"]
+
+  kubelet:
+    extraMounts:
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+
+  disks:
+    - device: /dev/disk/by-id/wwn-0x55cd2e404c1d321f
+      partitions:
+        - mountpoint: /var/lib/longhorn/data-1
+    - device: /dev/disk/by-id/wwn-0x55cd2e404b783a37
+      partitions:
+        - mountpoint: /var/lib/longhorn/data-2
+    - device: /dev/disk/by-id/wwn-0x55cd2e404b784e98
+      partitions:
+        - mountpoint: /var/lib/longhorn/data-3
+    - device: /dev/disk/by-id/wwn-0x55cd2e404c254309
+      partitions:
+        - mountpoint: /var/lib/longhorn/data-4
+
+  install:
+    disk: /dev/disk/by-id/ata-DELLBOSS_VD_eb9a3e602e7c0010
+    image: ghcr.io/siderolabs/installer:v1.12.4
+    wipe: false
+    grubUseUKICmdline: true
+
+  network:
+    hostname: talos-01
+    nameservers:
+      - 10.0.10.1
+    interfaces:
+      - interface: bond0
+        addresses:
+          - 10.0.8.50/24
+        bond:
+          mode: 802.3ad
+          interfaces:
+            - eno3
+            - eno4
+        vip:
+          ip: 10.0.8.10
+      - interface: bond1
+        addresses:
+          - 10.0.10.50/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.10.1
+        mtu: 9000
+        bond:
+          mode: 802.3ad
+          lacpRate: fast
+          xmitHashPolicy: layer3+4
+          interfaces:
+            - eno1np0
+            - eno2np1
