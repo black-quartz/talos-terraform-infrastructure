@@ -1,3 +1,7 @@
+###############################
+##### Talos Cluster Nodes ##### 
+###############################
+
 resource "talos_machine_secrets" "this" {
   talos_version = var.talos_version
 
@@ -51,3 +55,23 @@ data "talos_client_configuration" "this" {
   )
 }
 
+
+##################################
+### Cluster Bootstrap Services ###
+##################################
+
+### Cilium ###
+module "cilium" {
+  source = "./modules/cilium"
+
+  release_name = "cilium"
+  namespace    = "kube-system"
+
+  chart_repository = "oci://quay.io/cilium/charts/" 
+  chart_name       = "cilium"
+  chart_version    = "1.19.1" 
+
+  chart_values = []
+
+  depends_on = [ talos_machine_configuration_apply.control_plane ]
+}
