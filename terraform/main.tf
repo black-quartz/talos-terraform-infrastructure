@@ -69,3 +69,13 @@ module "cilium" {
 
   depends_on = [ talos_machine_configuration_apply.control_plane ]
 }
+
+### Longhorn ###
+module "longhorn" {
+  source = "./modules/longhorn"
+
+  release_name     = "longhorn"
+  longhorn_version = "1.11.1"
+
+  depends_on = [ module.cilium ]
+}
