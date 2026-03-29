@@ -6,19 +6,6 @@ variable "namespace" {
     type = string
 }
 
-variable "chart_repository" {
+variable "cilium_version" {
     type = string
-}
-
-variable "chart_name" {
-    type = string
-}
-
-variable "chart_version" {
-    type = string
-}
-
-variable "chart_values" {
-    type    = list(string)
-    default = []
 }

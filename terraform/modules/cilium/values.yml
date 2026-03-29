@@ -1,0 +1,71 @@
+# --- Infrastructure & Talos Integration ---
+namespace: kube-system
+k8sServiceHost: localhost
+k8sServicePort: 7445 # Talos KubePrism (Internal API Load Balancer)
+kubeProxyReplacement: true
+
+ipam:
+  mode: kubernetes
+# Talos uses a pre-mounted cgroupv2 and bpffs
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+# --- Performance Tuning (10G LACP / bond1) ---
+devices: "bond1"
+routingMode: native
+ipv4NativeRoutingCIDR: "10.254.0.0/16"
+autoDirectNodeRoutes: true
+bpf:
+  masquerade: true
+  tproxy: true
+  hostLegacyRouting: true
+loadBalancer:
+  acceleration: native
+
+# --- Gateway API & L2 Announcements ---
+gatewayAPI:
+  enabled: true
+  enableAlpn: true
+  enableAppProtocol: true
+l2announcements:
+  enabled: true
+externalIPs:
+  enabled: true
+
+# --- Stability & Forensic Visibility ---
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - http

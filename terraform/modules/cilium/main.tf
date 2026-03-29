@@ -8,11 +8,11 @@ resource "helm_release" "this" {
   name      = var.release_name
   namespace = var.namespace
 
-  repository = var.chart_repository
-  chart      = var.chart_name
-  version    = var.chart_version
+  repository = "oci://quay.io/cilium/charts/" 
+  chart      = "cilium"
+  version    = var.cilium_version
 
-  values = var.chart_values
+  values = [file("${path.module}/values.yml")]
 
   wait = true
 }

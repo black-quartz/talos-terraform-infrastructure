@@ -64,14 +64,9 @@ data "talos_client_configuration" "this" {
 module "cilium" {
   source = "./modules/cilium"
 
-  release_name = "cilium"
-  namespace    = "kube-system"
-
-  chart_repository = "oci://quay.io/cilium/charts/" 
-  chart_name       = "cilium"
-  chart_version    = "1.19.1" 
-
-  chart_values = []
+  release_name   = "cilium"
+  namespace      = "kube-system"
+  cilium_version = "1.19.1" 
 
   depends_on = [ talos_machine_configuration_apply.control_plane ]
 }
