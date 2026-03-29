@@ -8,7 +8,7 @@ This repository manages the configuration and deployment of Talos Linux nodes th
 
 #### Disaster Recovery
 
-The driving factory behind managing Talos' with Terraform is to simplify recovery operations in the event of a critical hardware failure, such as losing multiple operating system disks or even an entire node. By storing Talos' state in Terraform, the configuration of the whole cluster can easily be re-applied from GitHub. The main advantage of this approach over traditional Talos config files is that cluster secrets (tokens, encryption keys, etc.) can be stored in the Terraform state backend (generated from `talos_machine_secrets.this`), allowing the main configuration to be stored in version control.
+The driving factor behind managing Talos with Terraform is to simplify recovery operations in the event of a critical hardware failure, such as losing multiple operating system disks or even an entire node. By storing Talos' state in Terraform, the configuration of the whole cluster can easily be re-applied from GitHub. The main advantage of this approach over traditional Talos config files is that cluster secrets (tokens, encryption keys, etc.) can be stored in the Terraform state backend (generated from `talos_machine_secrets.this`), allowing the main configuration to be stored in version control.
 
 
 ## Repository Structure
@@ -45,7 +45,7 @@ Adding a new node simply involves adding a new file to the directory under the n
 
 ## Patch Hierarchy
 
-Configuration patching allows modifying machine configuration to fit it for the cluster or a specific machine. This Terraform code in `patches.tf` takes advantage of Talos' [`Stategic Merge patches`](https://docs.siderolabs.com/talos/v1.9/configure-your-talos-cluster/system-configuration/patching#strategic-merge-patches), which can merge different configs under the same key for modularity. The following general strategy is used to merge configs patches together for a node:
+Configuration patching allows modifying machine configuration to fit it for the cluster or a specific machine. This Terraform code in `patches.tf` takes advantage of Talos' [**Stategic Merge patches**](https://docs.siderolabs.com/talos/v1.9/configure-your-talos-cluster/system-configuration/patching#strategic-merge-patches), which can merge different configs under the same key for modularity. The following general strategy is used to merge configs patches together for a node:
 
 ```plaintext
 1. Cluster Wide Configs     - universal baseline
