@@ -1,12 +1,6 @@
-resource "kubernetes_namespace" "this" {
-    metadata {
-        name = var.namespace
-    }
-}
-
 resource "helm_release" "this" {
   name      = var.release_name
-  namespace = var.namespace
+  namespace = "kube-system"
 
   repository = "oci://quay.io/cilium/charts/" 
   chart      = "cilium"
@@ -14,5 +8,6 @@ resource "helm_release" "this" {
 
   values = [file("${path.module}/values.yml")]
 
-  wait = true
+  wait    = true
+  timeout = 300 # 5m
 }

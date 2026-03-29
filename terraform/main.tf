@@ -65,7 +65,6 @@ module "cilium" {
   source = "./modules/cilium"
 
   release_name   = "cilium"
-  namespace      = "kube-system"
   cilium_version = "1.19.1" 
 
   depends_on = [ talos_machine_configuration_apply.control_plane ]
