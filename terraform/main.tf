@@ -83,6 +83,8 @@ module "longhorn" {
   client_key             = data.talos_client_configuration.this.client_configuration.client_key 
 
   longhorn_default_data_path = "/var/lib/longhorn/data-1"
+
+  depends_on = [ module.cilium ]
 }
 
 ### Flux Operator ###
@@ -101,4 +103,6 @@ module "flux" {
   git_url  = "https://github.com/black-quartz/flux-fleet-management.git"
   git_ref  = "refs/heads/main"
   git_path = "kubernetes/production"
+
+  depends_on = [ module.cilium ]
 }
