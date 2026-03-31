@@ -77,10 +77,12 @@ module "cilium" {
 module "longhorn" {
   source = "./modules/longhorn"
 
-  release_name     = "longhorn"
-  longhorn_version = "1.11.1"
+  kubernetes_host        = local.cluster_endpoint
+  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
+  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
+  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
 
-  depends_on = [ module.cilium ]
+  longhorn_default_data_path = "/var/lib/longhorn/data-1"
 }
 
 ### Flux Operator ###

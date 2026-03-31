@@ -1,7 +1,29 @@
-variable "release_name" {
-    type = string
+variable "kubernetes_host" {
+    description = "The hostname (in the form of URI) of the Kubernetes API."
+    type        = string
+    nullable    = false
 }
 
-variable "longhorn_version" {
-    type = string
+variable "cluster_ca_certificate" {
+    description = "PEM-encoded root certificates bundle for TLS authentication."
+    type        = string
+    nullable    = false
+}
+
+variable "client_certificate" {
+    description = "PEM-encoded client certificate for TLS authentication."
+    type        = string
+    nullable    = false
+}
+
+variable "client_key" {
+    description = "PEM-encoded client certificate key for TLS authentication."
+    type        = string
+    nullable    = false
+}
+
+variable "longhorn_default_data_path" {
+    description = "Default data path for Longhorn."
+    type        = string
+    default     = "/var/lib/longhorn-primary"
 }
