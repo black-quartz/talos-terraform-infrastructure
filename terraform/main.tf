@@ -13,6 +13,15 @@ resource "talos_machine_secrets" "this" {
   }
 }
 
+data "talos_client_configuration" "this" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  nodes = concat(
+    [var.cluster_endpoint],
+    keys(local.control_plane_nodes)
+  )
+}
+
 data "talos_machine_configuration" "control_plane" {
   for_each = local.control_plane_nodes
 
@@ -48,16 +57,6 @@ resource "talos_machine_configuration_apply" "control_plane" {
     }
   }
 }
-
-data "talos_client_configuration" "this" {
-  cluster_name         = var.cluster_name
-  client_configuration = talos_machine_secrets.this.client_configuration
-  nodes = concat(
-    [var.cluster_endpoint],
-    keys(local.control_plane_nodes)
-  )
-}
-
 
 ##################################
 ### Cluster Bootstrap Services ###
