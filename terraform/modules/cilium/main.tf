@@ -2,7 +2,7 @@ resource "helm_release" "this" {
   name      = var.release_name
   namespace = "kube-system"
 
-  repository = "oci://quay.io/cilium/charts/" 
+  repository = "oci://quay.io/cilium/charts" 
   chart      = "cilium"
   version    = var.cilium_version
 

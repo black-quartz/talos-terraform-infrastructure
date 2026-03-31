@@ -1,6 +1,9 @@
 ###############################
 ##### Talos Cluster Nodes ##### 
 ###############################
+locals {
+  cluster_endpoint = "https://${var.cluster_endpoint}:6443"
+}
 
 resource "talos_machine_secrets" "this" {
   talos_version = var.talos_version
@@ -14,7 +17,7 @@ data "talos_machine_configuration" "control_plane" {
   for_each = local.control_plane_nodes
 
   cluster_name     = var.cluster_name
-  cluster_endpoint = "https://${var.cluster_endpoint}:6443"
+  cluster_endpoint = local.cluster_endpoint
   
   machine_type    = "controlplane"
   machine_secrets = talos_machine_secrets.this.machine_secrets
@@ -78,4 +81,22 @@ module "longhorn" {
   longhorn_version = "1.11.1"
 
   depends_on = [ module.cilium ]
+}
+
+### Flux Operator ###
+module "flux" {
+  source = "./modules/flux"
+
+  kubernetes_host        = local.cluster_endpoint
+  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
+  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
+  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
+
+  github_app_id              = var.flux_github_app_id
+  github_app_installation_id = var.flux_github_app_installation_id
+  github_app_pem             = var.flux_github_app_pem 
+
+  git_url  = "https://github.com/black-quartz/flux-fleet-management.git"
+  git_ref  = "refs/heads/main"
+  git_path = "kubernetes/production"
 }
