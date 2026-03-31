@@ -13,7 +13,6 @@ resource "helm_release" "this" {
   namespace  = "longhorn-system"
   repository = "https://charts.longhorn.io"
   chart      = "longhorn"
-  version    = var.longhorn_version
   wait       = true
   
   values = [
