@@ -2,99 +2,106 @@
 ##### Talos Cluster Nodes ##### 
 ###############################
 locals {
-  cluster_endpoint = "https://${var.cluster_endpoint}:6443"
+  cluster_endpoint_uri = "https://${var.cluster_endpoint}:6443"
 }
 
-resource "talos_machine_secrets" "this" {
-  talos_version = var.talos_version
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
+resource "talos_machine_secrets" "this" {}
 
 data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
-  nodes                = [var.cluster_endpoint]
+  endpoints            = concat([var.cluster_endpoint], [for k, v in var.node_data.controlplanes : v.address])
 }
 
-data "talos_machine_configuration" "control_plane" {
-  for_each = local.control_plane_nodes
-
+data "talos_machine_configuration" "controlplane" {
   cluster_name     = var.cluster_name
-  cluster_endpoint = local.cluster_endpoint
-  
-  machine_type    = "controlplane"
-  machine_secrets = talos_machine_secrets.this.machine_secrets
-
-  talos_version = var.talos_version
-  
-  config_patches = [
-    local.talos_image_patch,
-    local.cluster_patch,
-    local.cluster_identity_patch,
-    local.control_plane_patch,
-    local.control_plane_node_patches[each.key]
-  ]
+  cluster_endpoint = local.cluster_endpoint_uri
+  machine_type     = "controlplane"
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_machine_configuration_apply" "control_plane" {
-  for_each = local.control_plane_nodes
+resource "talos_machine_configuration_apply" "controlplane" {
+  for_each = var.node_data.controlplanes
 
   client_configuration        = talos_machine_secrets.this.client_configuration
-  machine_configuration_input = data.talos_machine_configuration.control_plane[each.key].machine_configuration
-  node                        = each.value.metadata.address
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  node                        = each.value.address
 
-  lifecycle {
-    prevent_destroy = true
-    precondition {
-      condition     = talos_machine_secrets.this.machine_secrets != null
-      error_message = "Machine secrets must be imported before applying node config." 
-    }
-  }
+  config_patches = [
+    file("${path.module}/nodes/controlplane/${each.key}.yml"),
+    file("${path.module}/files/cluster-network.yml"),
+    file("${path.module}/files/controlplane-scheduling.yml"),
+    file("${path.module}/files/kernel-modules.yml"),
+    file("${path.module}/files/kube-proxy.yml"),
+    file("${path.module}/files/time-servers.yml"),
+    templatefile("${path.module}/templates/hostname-config.yml.tftpl", {
+      hostname = each.value.hostname
+    }),
+    templatefile("${path.module}/templates/install-image.yml.tftpl", {
+      install_image = data.talos_image_factory_urls.base.urls.installer
+    })
+  ]
+}
+resource "talos_machine_bootstrap" "this" {
+  depends_on = [talos_machine_configuration_apply.controlplane]
+
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = [for k, v in var.node_data.controlplanes : v.address][0]
+}
+
+resource "talos_cluster_kubeconfig" "this" {
+  depends_on = [talos_machine_bootstrap.this]
+  
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = [for k, v in var.node_data.controlplanes : v.address][0]
 }
 
 ##################################
 ### Cluster Bootstrap Services ###
 ##################################
 
+resource "time_sleep" "after_bootstrap" {
+  depends_on = [talos_machine_bootstrap.this]
+
+  create_duration = "60s"
+}
+
 ### Cilium ###
 module "cilium" {
+  depends_on = [talos_machine_configuration_apply.controlplane]
+  
   source = "./modules/cilium"
-
-  kubernetes_host        = local.cluster_endpoint
-  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
-  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
-  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
+  providers = {
+    helm = helm
+  }
 
   cilium_version = "1.19.1" 
-
-  depends_on = [ talos_machine_configuration_apply.control_plane ]
 }
 
 ### Longhorn ###
 module "longhorn" {
+  depends_on = [module.cilium]
+  
   source = "./modules/longhorn"
 
-  kubernetes_host        = local.cluster_endpoint
-  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
-  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
-  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+  }
 
   longhorn_default_data_path = "/var/lib/longhorn/data-1"
-
-  depends_on = [ module.cilium ]
 }
 
 ### Flux Operator ###
 module "flux" {
+  depends_on = [module.cilium]
+  
   source = "./modules/flux"
 
-  kubernetes_host        = local.cluster_endpoint
-  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
-  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
-  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+  }
 
   github_app_id              = var.flux_github_app_id
   github_app_installation_id = var.flux_github_app_installation_id
@@ -103,6 +110,4 @@ module "flux" {
   git_url  = "https://github.com/black-quartz/flux-fleet-management.git"
   git_ref  = "refs/heads/main"
   git_path = "kubernetes/production"
-
-  depends_on = [ module.cilium ]
 }

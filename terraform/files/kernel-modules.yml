@@ -1,0 +1,8 @@
+machine:
+  kernel:
+    modules:
+      - name: bonding
+      - name: bridge
+      - name: dm_crypt
+      - name: iscsi_tcp
+      - name: tun

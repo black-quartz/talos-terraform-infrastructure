@@ -1,12 +1,10 @@
-metadata:
-  hostname: talos-01
-  address: talos-01
-
 machine:
   nodeLabels:
     node.kubernetes.io/exclude-from-external-load-balancers: ""
 
-  certSANs: ["talos.labrynth.cloud", "talos-01"]
+  certSANs:
+    - "platform.blackquartz.io"
+    - "talos-01.blackquartz.internal"
 
   kubelet:
     extraMounts:
@@ -34,18 +32,16 @@ machine:
 
   install:
     disk: /dev/disk/by-id/ata-DELLBOSS_VD_eb9a3e602e7c0010
-    image: ghcr.io/siderolabs/installer:v1.12.4
     wipe: false
     grubUseUKICmdline: true
 
   network:
-    hostname: talos-01
     nameservers:
       - 10.0.10.1
     interfaces:
       - interface: bond0
         addresses:
-          - 10.0.8.50/24
+          - 10.0.8.6/24
         bond:
           mode: 802.3ad
           interfaces:

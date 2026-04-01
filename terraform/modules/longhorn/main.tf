@@ -1,6 +1,9 @@
 resource "kubernetes_namespace_v1" "this" {
     metadata {
-      name = "longhorn-system"
+      name   = "longhorn-system"
+      labels = {
+        "pod-security.kubernetes.io/enforce" = "privileged" # Required for Longhorn
+      }
     }
 
     lifecycle {
