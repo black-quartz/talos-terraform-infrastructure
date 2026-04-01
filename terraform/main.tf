@@ -16,10 +16,7 @@ resource "talos_machine_secrets" "this" {
 data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
-  nodes = concat(
-    [var.cluster_endpoint],
-    keys(local.control_plane_nodes)
-  )
+  nodes                = [var.cluster_endpoint]
 }
 
 data "talos_machine_configuration" "control_plane" {
@@ -66,7 +63,11 @@ resource "talos_machine_configuration_apply" "control_plane" {
 module "cilium" {
   source = "./modules/cilium"
 
-  release_name   = "cilium"
+  kubernetes_host        = local.cluster_endpoint
+  cluster_ca_certificate = data.talos_client_configuration.this.client_configuration.ca_certificate
+  client_certificate     = data.talos_client_configuration.this.client_configuration.client_certificate
+  client_key             = data.talos_client_configuration.this.client_configuration.client_key 
+
   cilium_version = "1.19.1" 
 
   depends_on = [ talos_machine_configuration_apply.control_plane ]

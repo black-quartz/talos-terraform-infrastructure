@@ -45,9 +45,7 @@ loadBalancer:
 
 # --- Gateway API & L2 Announcements ---
 gatewayAPI:
-  enabled: true
-  enableAlpn: true
-  enableAppProtocol: true
+  enabled: false
 l2announcements:
   enabled: true
 externalIPs:
