@@ -23,6 +23,10 @@ resource "kubernetes_secret_v1" "this" {
     }
 
     type = "Opaque"
+
+    lifecycle {
+      ignore_changes = [ data ]
+    }
 }
 
 # Install the Flux Operator

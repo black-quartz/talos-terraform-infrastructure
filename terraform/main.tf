@@ -109,5 +109,5 @@ module "flux" {
 
   git_url  = "https://github.com/black-quartz/flux-fleet-management.git"
   git_ref  = "refs/heads/main"
-  git_path = "kubernetes/production"
+  git_path = "kubernetes/clusters/production"
 }
