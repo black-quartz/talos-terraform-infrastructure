@@ -1,0 +1,4 @@
+# Disable CoreDNS deployment on cluster bootstrap so we can manage it with Helm
+cluster:
+  coreDNS:
+    disabled: true
