@@ -6,5 +6,5 @@ resource "helm_release" "this" {
   version    = var.cilium_version
   wait       = true
   
-  values = [file("${path.module}/helm/values.yml")]
+  values = [file("${path.module}/values/base.yml")]
 }
