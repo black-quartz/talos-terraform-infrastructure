@@ -37,24 +37,24 @@ machine:
 
   network:
     nameservers:
-      - 10.0.10.1
+      - 10.0.60.1
     interfaces:
       - interface: bond0
         addresses:
-          - 10.0.8.6/24
+          - 10.0.40.6/24
         bond:
           mode: 802.3ad
           interfaces:
             - eno3
             - eno4
         vip:
-          ip: 10.0.8.10
+          ip: 10.0.40.10
       - interface: bond1
         addresses:
-          - 10.0.10.50/24
+          - 10.0.60.50/24
         routes:
           - network: 0.0.0.0/0
-            gateway: 10.0.10.1
+            gateway: 10.0.60.1
         mtu: 9000
         bond:
           mode: 802.3ad
