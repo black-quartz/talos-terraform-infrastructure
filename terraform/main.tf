@@ -75,6 +75,16 @@ module "cilium" {
 
   cilium_version = "1.19.1"
 
+  load_balancer_ip_pool_cidrs = [
+    {
+      cidr  = "10.0.8.0/24"
+      start = "10.0.80.10"
+      stop  = "10.0.80.254"
+    }
+  ]
+
+  l2_announcement_interfaces = ["bond1"]
+
   depends_on = [talos_machine_configuration_apply.controlplane]
 }
 

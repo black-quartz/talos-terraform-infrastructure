@@ -1,0 +1,11 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: external-lb-policy
+spec:
+  externalIPs: false
+  loadBalancerIPs: true
+  interfaces:
+%{ for item in l2_announcement_interfaces ~}
+    - ${item}
+%{ endfor ~}

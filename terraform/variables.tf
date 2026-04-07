@@ -10,8 +10,18 @@ variable "kubernetes_version" {
 }
 
 variable "node_data" {
-    type        = map(any)
+    type = object({
+        controlplanes = optional(map(object({
+            hostname = string
+            address  = string
+        })), {})
+        workers = optional(map(object({
+            hostname = string
+            address  = string
+        })), {})
+    })
     description = "Data about the nodes in the cluster."
+    
     default     = {
         controlplanes = {
             talos-01 = {
@@ -19,6 +29,7 @@ variable "node_data" {
                 address  = "talos-01.blackquartz.internal"
             }
         }
+        workers = {}
     }
 }
 variable "cluster_name" {
