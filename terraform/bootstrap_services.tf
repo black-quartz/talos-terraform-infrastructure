@@ -19,7 +19,7 @@ resource "helm_release" "cilium" {
 
   set = [
     {
-        name  = "peerService.clusterDomain"
+        name  = "hubble.peerService.clusterDomain"
         value = var.cluster_domain
     },
   ]
