@@ -1,0 +1,24 @@
+defaultSettings:
+  defaultReplicateCount: 1
+  defaultDataLocality: best-effort
+
+persistence:
+  defaultClass: true
+  defaultClassReplicaCount: 1
+  defaultFsType: ext4
+
+service:
+  ui:
+    type: ClusterIP
+
+longhornUI:
+  log:
+    format: json
+
+longhornManager:
+  log:
+    format: json
+
+longhornDriver:
+  log:
+    format: json

@@ -35,7 +35,7 @@ variable "node_data" {
 variable "cluster_name" {
     type        = string
     description = "Name of the Talos Kubernetes cluster."
-    default     = "black-quartz-platform"
+    default     = "black-quartz-prod-us-1"
 }
 
 variable "cluster_endpoint" {
@@ -44,20 +44,8 @@ variable "cluster_endpoint" {
     default     = "platform.blackquartz.io"
 }
 
-variable "flux_github_app_id" {
-    description = "GitHub App ID for Flux."
+variable "cluster_domain" {
     type        = string
-    nullable    = false
-}
-
-variable "flux_github_app_installation_id" {
-    description = "GitHub App Installation ID for Flux."
-    type        = string
-    nullable    = false
-}
-
-variable "flux_github_app_pem" {
-    description = "GitHub App Private Key for Flux."
-    type        = string
-    nullable    = false
+    description = "Internal domain used by the Kubernetes cluster."
+    default     = "prod-us-1.blackquartz.io"
 }

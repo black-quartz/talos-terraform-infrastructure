@@ -29,22 +29,33 @@ resource "talos_machine_configuration_apply" "controlplane" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
   node                        = each.value.address
-  apply_mode                  = "staged_if_needing_reboot" 
 
   config_patches = concat(
-    [ file("${path.module}/nodes/controlplane/${each.key}.yml") ],
     [ for f in local.patch_files : file(f) ],
     [
-      templatefile("${path.module}/templates/hostname-config.yml.tftpl", {
+      file("nodes/controlplane/${each.key}.yml"),
+
+      templatefile("templates/cluster-network.yml.tftpl", {
+        cluster_domain = var.cluster_domain
+      }),
+
+      templatefile("templates/hostname-config.yml.tftpl", {
         hostname = each.value.hostname
       }),
 
-      templatefile("${path.module}/templates/install-image.yml.tftpl", {
+      templatefile("templates/install-image.yml.tftpl", {
         install_image = data.talos_image_factory_urls.base.urls.installer
       })
     ]
   )
 }
+
+resource "time_sleep" "before_bootstrap" {
+  create_duration = "60s"
+
+  depends_on = [talos_machine_bootstrap.this]
+}
+
 resource "talos_machine_bootstrap" "this" {
   depends_on = [talos_machine_configuration_apply.controlplane]
 
@@ -57,65 +68,4 @@ resource "talos_cluster_kubeconfig" "this" {
   
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = [for k, v in var.node_data.controlplanes : v.address][0]
-}
-
-##################################
-### Cluster Bootstrap Services ###
-##################################
-
-resource "time_sleep" "after_bootstrap" {
-  create_duration = "60s"
-
-  depends_on = [talos_machine_bootstrap.this]
-}
-
-### Cilium ###
-module "cilium" {
-  source = "./modules/cilium"
-
-  cilium_version = "1.19.1"
-
-  load_balancer_ip_pool_cidrs = [
-    {
-      cidr  = "10.0.8.0/24"
-      start = "10.0.80.10"
-      stop  = "10.0.80.254"
-    }
-  ]
-
-  l2_announcement_interfaces = ["bond1"]
-
-  depends_on = [talos_machine_configuration_apply.controlplane]
-}
-
-module "coredns" {
-  source = "./modules/coredns"
-
-  coredns_version = "1.45.2"
-
-  depends_on = [module.cilium]
-}
-
-### Longhorn ###
-module "longhorn" {
-  source = "./modules/longhorn"
-
-  longhorn_default_data_path = "/var/lib/longhorn/data-1"
-
-  depends_on = [module.cilium]
-}
-
-### Flux Operator ###
-module "flux" {
-  source = "./modules/flux"
-
-  github_app_id              = var.flux_github_app_id
-  github_app_installation_id = var.flux_github_app_installation_id
-  github_app_pem             = var.flux_github_app_pem 
-
-  git_url  = "https://github.com/black-quartz/flux-fleet-management.git"
-  git_ref  = "refs/heads/main"
-  git_path = "kubernetes/clusters/production"
-
-  depends_on = [module.cilium]
 }
