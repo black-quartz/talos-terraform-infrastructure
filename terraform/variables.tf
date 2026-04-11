@@ -49,3 +49,9 @@ variable "cluster_domain" {
     description = "Internal domain used by the Kubernetes cluster."
     default     = "prod-us-1.blackquartz.io"
 }
+
+variable "cilium_loadbalancer_resources_enabled" {
+    type        = bool
+    description = "Whether to enable Cilium Load Balancer resources."
+    default     = true
+}

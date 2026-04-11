@@ -27,6 +27,42 @@ resource "helm_release" "cilium" {
   depends_on = [time_sleep.after_bootstrap]
 }
 
+resource "kubernetes_manifest" "lb_ip_pool" {
+  count = var.cilium_loadbalancer_resources_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "cilium.io/v2alpha1"
+    kind       = "CiliumLoadBalancerIPPool"
+    metadata = {
+      name = "external-lb-pool"
+    }
+    spec = {
+      blocks = [
+        {
+          cidr  = "10.20.80.0/24"
+          start = "10.20.80.10"
+          stop  = "10.20.80.254"
+        }
+      ]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "l2_announcement_policy" {
+  count = var.cilium_loadbalancer_resources_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "cilium.io/v2alpha1"
+    kind       = "CiliumL2AnnouncementPolicy"
+    metadata = {
+      name = "external-lb-policy"
+    }
+    spec = {
+      externalIPs     = false
+      loadBalancerIPs = true
+      interfaces      = ["bond1"]
+    }
+  }
+}
+
 resource "helm_release" "coredns" {
   name       = "coredns"
   namespace  = "kube-system"
