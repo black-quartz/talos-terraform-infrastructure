@@ -38,7 +38,6 @@ resource "kubernetes_manifest" "lb_ip_pool" {
     spec = {
       blocks = [
         {
-          cidr  = "10.20.80.0/24"
           start = "10.20.80.10"
           stop  = "10.20.80.254"
         }
