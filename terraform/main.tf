@@ -4,7 +4,7 @@
 locals {
   cluster_endpoint_uri = "https://${var.cluster_endpoint}:6443"
 
-  patch_files = fileset(path.module, "files/*.{yml,yaml}")
+  patch_files = fileset(path.module, "patches/*.{yml,yaml}")
 
 }
 
