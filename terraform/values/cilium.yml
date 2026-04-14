@@ -1,3 +1,4 @@
+# https://github.com/cilium/cilium/blob/main/install/kubernetes/cilium/values.yaml
 # --- Infrastructure & Talos Integration ---
 namespace: kube-system
 k8sServiceHost: localhost
@@ -57,8 +58,12 @@ hubble:
   enabled: true
   relay:
     enabled: true
+    logOptions:
+      format: json
+      level: info
   ui:
     enabled: true
+  
   metrics:
     enabled:
       - dns
@@ -68,3 +73,10 @@ hubble:
       - port-distribution
       - icmp
       - http
+  
+  export:
+    static:
+      enabled: true
+      filePath: /var/run/cilium/hubble/events.log
+      fileMaxSizeMb: 10
+      fileMaxBackups: 5
