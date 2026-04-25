@@ -26,7 +26,7 @@ variable "node_data" {
         controlplanes = {
             talos-01 = {
                 hostname = "talos-01"
-                address  = "talos-01.blackquartz.internal"
+                address  = "talos-01.ilysium.internal"
             }
         }
         workers = {}
@@ -35,19 +35,19 @@ variable "node_data" {
 variable "cluster_name" {
     type        = string
     description = "Name of the Talos Kubernetes cluster."
-    default     = "black-quartz-prod-us-1"
+    default     = "ilysium-prod-us-1"
 }
 
 variable "cluster_endpoint" {
     type        = string
     description = "Address of the Talos API server."
-    default     = "platform.blackquartz.io"
+    default     = "platform.ilysium.io"
 }
 
 variable "cluster_domain" {
     type        = string
     description = "Internal domain used by the Kubernetes cluster."
-    default     = "prod-us-1.blackquartz.io"
+    default     = "prod-us-1.ilysium.io"
 }
 
 variable "cilium_loadbalancer_resources_enabled" {
